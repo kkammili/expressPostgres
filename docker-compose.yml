@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_container
+    restart: always
+    environment:
+      POSTGRES_DB: monsterdb
+      POSTGRES_USER: monsteruser
+      POSTGRES_PASSWORD: monsterpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - monster-net
+
+  app:
+    build: .
+    container_name: express_monster_api
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      DB_USER: monsteruser
+      DB_HOST: db
+      DB_DATABASE: monsterdb
+      DB_PASSWORD: monsterpass
+      DB_PORT: 5432
+    networks:
+      - monster-net
+    volumes:
+      - .:/usr/src/app
+    command: ["node", "app.js"]
+
+volumes:
+  postgres_data:
+
+networks:
+  monster-net:
